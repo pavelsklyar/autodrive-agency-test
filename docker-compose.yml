@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+    autodrive-php-fpm:
+        container_name: autodrive-php-fpm
+        build:
+            context: .
+            dockerfile: ./deploy/php-fpm/Dockerfile
+        volumes:
+            - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini
+            - ./app:/var/www/app
+            - ./bootstrap:/var/www/bootstrap
+            - ./config:/var/www/config
+            - ./database:/var/www/database
+            - ./public:/var/www/public
+            - ./resources:/var/www/resources
+            - ./routes:/var/www/routes
+            - ./storage:/var/www/storage
+            - ./tests:/var/www/tests
+            - ./.env:/var/www/.env
+            - ./artisan:/var/www/artisan
+            - ./composer.json:/var/www/composer.json
+            - ./composer.lock:/var/www/composer.lock
+            - ./phpunit.xml:/var/www/phpunit.xml
+        depends_on:
+            - autodrive-percona
+        environment:
+            TZ: "Europe/Moscow"
+
+    autodrive-percona:
+        container_name: autodrive-percona
+        ports:
+            - "3336:3306"
+        volumes:
+            - autodrive-database-data:/var/lib/mysql
+        image: percona:8.0
+        restart: always
+        environment:
+            TZ: "Europe/Moscow"
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+
+volumes:
+    autodrive-database-data: # данные БД
